@@ -36,9 +36,10 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates := bot.GetUpdatesChan(u)
+	
+	go http.ListenAndServe("0.0.0.0:443", nil)
 
 	for update := range updates {
-		go http.ListenAndServe("0.0.0.0:8443", nil)
 		
 		if update.Message != nil {
 			wordFromUser := update.Message.Text
