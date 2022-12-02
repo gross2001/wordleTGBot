@@ -36,6 +36,8 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
+		go http.ListenAndServe("0.0.0.0:8443", nil)
+		
 		if update.Message != nil {
 			wordFromUser := update.Message.Text
 			userName := update.Message.From.UserName
