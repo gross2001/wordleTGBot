@@ -1,27 +1,41 @@
 package vocab
 
 import (
-	"encoding/xml"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
-	"strings"
 )
 
-type myXMLstruct struct {
-	XMLName      xml.Name `xml:"res"`
-	Text         string   `xml:",chardata"`
-	ResponseType string   `xml:"responseType"`
-	Word         string   `xml:"word"`
-	POS          string   `xml:"POS"`
-	Translation  string   `xml:"translation"`
-	Examples     string   `xml:"examples"`
-	Mt           string   `xml:"mt"`
+const (
+	yandex    = "dict.1.1.20221203T124750Z.44df4b4d5ab923fc.21ee7e9333917cd13a50c8fc552bc7590a1d7e43"
+	lang      = "tt-ru"
+	urlToDict = "https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key="
+)
+
+type myJSONstruct struct {
+	Def []def `json:"def"`
 }
 
-func getXML(url string) ([]byte, error) {
+type def struct {
+	PartOfSpeech string `json:"pos"`
+}
+
+func containsNoun(s []def) bool {
+	for _, a := range s {
+		if a.PartOfSpeech == "noun" {
+			return true
+		}
+	}
+	return false
+}
+
+func getJSON(word string) ([]byte, error) {
+	//	url := url.QueryEscape(urlToDict + yandex + "&lang=" + lang + "&text=" + word)
+	url := urlToDict + yandex + "&lang=" + lang + "&text=" + word
+	log.Println(url)
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return []byte{}, fmt.Errorf("GET error: %v", err)
@@ -40,43 +54,16 @@ func getXML(url string) ([]byte, error) {
 	return data, nil
 }
 
-func giveAllWords(word string) []string {
-	var dict map[rune]string = make(map[rune]string, 0)
-	dict['э'] = "ә"
-	dict['у'] = "ү"
-	dict['ж'] = "җ"
-	dict['н'] = "ң"
-	dict['х'] = "һ"
-	dict['о'] = "ө"
-
-	var result []string
-	var anotherStr string
-	result = append(result, word)
-	for _, char := range word {
-		for key := range dict {
-			if char == key {
-				anotherStr = strings.Replace(word, string(key), dict[key], 1)
-				result = append(result, giveAllWords(anotherStr)...)
-			}
-		}
-	}
-	return result
-}
-
 func DoRequest(word string) string {
 
-	var result myXMLstruct
-	allWords := giveAllWords(word)
-	log.Println(allWords)
+	var result myJSONstruct
 
-	for _, everyWord := range allWords {
-		if xmlBytes, err := getXML("https://translate.tatar/translate?lang=1&text=" + url.QueryEscape(everyWord)); err != nil {
-			log.Printf("Failed to get XML: %v", err)
-		} else {
-			xml.Unmarshal(xmlBytes, &result)
-			if len(result.Word) != 0 {
-				return everyWord
-			}
+	if jsonBytes, err := getJSON(word); err != nil {
+		log.Printf("Failed to get XML: %v", err)
+	} else {
+		json.Unmarshal(jsonBytes, &result)
+		if containsNoun(result.Def) == true {
+			return word
 		}
 	}
 

@@ -1,88 +1,96 @@
 package main
 
-func giveNextString(strSlice []string, value string) string {
-	for p, v := range strSlice[:len(strSlice)-1] {
-		if v == value {
-			return strSlice[p+1]
-		}
-	}
-	return ""
+import (
+	"log"
+	"strconv"
+	"strings"
+	imgwordle "wordle/imagewordle"
+	"wordle/vocab"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+)
+
+type usersAnswer struct {
+	riddleNumb int
+	riddle     string
+	answers    []string
+}
+
+func startNewGame(userAnswer usersAnswer) usersAnswer {
+	userAnswer.riddleNumb++
+	userAnswer.riddle = answers[userAnswer.riddleNumb]
+	userAnswer.answers = make([]string, 0)
+	return userAnswer
 }
 
 func main() {
-	/*
-	   var answers = []string{"мамык", "капка", "көрәк", "бакча", "дәрес", "китап"}
-	   var users map[string][]string
 
-	   bot, err := tgbotapi.NewBotAPI("5347435152:AAFtYhWbwK19LdIXypTJD6sZ-qoiGIKyHPU")
+	users := make(map[string]usersAnswer, 0)
+	bot, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		log.Panic(err)
+	}
 
-	   	if err != nil {
-	   		log.Panic(err)
-	   	}
+	bot.Debug = true
+	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	   bot.Debug = true
-	   log.Printf("Authorized on account %s", bot.Self.UserName)
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+	updates := bot.GetUpdatesChan(u)
 
-	   u := tgbotapi.NewUpdate(0)
-	   u.Timeout = 60
-	   updates := bot.GetUpdatesChan(u)
+	for update := range updates {
 
-	   for update := range updates {
+		if update.Message != nil {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, " ")
+			msg.ReplyToMessageID = update.Message.MessageID
 
-	   		if update.Message != nil {
-	   			wordFromUser := update.Message.Text
-	   			userName := update.Message.From.UserName
-	   			log.Printf(".Message.From.UserName[%s] Message %s", update.Message.From.UserName, update.Message.Text)
+			wordFromUser := strings.ToLower(update.Message.Text)
+			userName := update.Message.From.UserName
+			log.Printf(".Message.From.UserName[%s] Message %s", update.Message.From.UserName, update.Message.Text)
 
-	   			msg := tgbotapi.NewMessage(update.Message.Chat.ID, " ")
-	   			msg.ReplyToMessageID = update.Message.MessageID
+			if len([]rune(wordFromUser)) != 5 {
+				msg.Text = onlyFiveLetter
+				bot.Send(msg)
+				continue
+			}
 
-	   			if len([]rune(wordFromUser)) != 5 {
-	   				msg.Text = "Сүз 5 хәрефтән торорга тиеш"
-	   				bot.Send(msg)
-	   				continue
-	   			}
-	   			//	isWordExist := vocab.DoRequest(strings.ToLower(wordFromUser))
-	   			wordFromUser = vocab.DoRequest(strings.ToLower(wordFromUser))
-	   			if len(wordFromUser) == 0 {
-	   				msg.Text = "Сүзлектә мондый сүз табылмады. ә/э, ү/у, җ/ж, ң/н, һ/х, ө/о"
-	   				bot.Send(msg)
-	   				continue
-	   			}
+			wordFromUser = vocab.DoRequest(wordFromUser)
+			if len(wordFromUser) == 0 {
+				msg.Text = wordNotExist
+				bot.Send(msg)
+				continue
+			}
 
-	   			if _, ok := users[userName]; ok {
-	   				users[userName] = append(users[userName], strings.ToLower(wordFromUser))
-	   			} else {
-	   				users = make(map[string][]string, 0)
-	   				users[userName] = append(users[userName], answers[0])
-	   				users[userName] = append(users[userName], strings.ToLower(wordFromUser))
-	   			}
-	   			imgToSend := imgwordle.CreateImage(users[userName][0], users[userName][1:])
+			var userAnswer usersAnswer
+			var ok bool
+			if userAnswer, ok = users[userName]; !ok {
+				userAnswer.riddle = answers[0]
+			}
 
-	   			photoFileBytes := tgbotapi.FileBytes{
-	   				Name:  "picture",
-	   				Bytes: imgToSend,
-	   			}
-	   			bot.Send(tgbotapi.NewPhoto(int64(update.Message.Chat.ID), photoFileBytes))
+			userAnswer.answers = append(userAnswer.answers, wordFromUser)
 
-	   			var needNewWord int
-	   			if users[userName][0] == users[userName][len(users[userName])-1] {
-	   				msg.Text = "Дөрес! Яңа сүз уйлап куйдым!"
-	   				needNewWord = 1
-	   			} else if len(users[userName]) == 7 {
-	   				msg.Text = "Дөрес сүз булды: " + users[userName][0] + ". Яңа сүз уйлап куйдым!"
-	   				needNewWord = 1
-	   			} else {
-	   				msg.Text = "Син тагын " + strconv.Itoa(7-len(users[userName])) + " кабат җавап бираласен"
-	   			}
-	   			bot.Send(msg)
+			imgToSend := imgwordle.CreateImage(userAnswer.riddle, userAnswer.answers)
 
-	   			if needNewWord == 1 {
-	   				users[userName][0] = giveNextString(answers, users[userName][0])
-	   				users[userName] = users[userName][:1]
-	   			}
+			photoFileBytes := tgbotapi.FileBytes{
+				Name:  "picture",
+				Bytes: imgToSend,
+			}
+			bot.Send(tgbotapi.NewPhoto(int64(update.Message.Chat.ID), photoFileBytes))
 
-	   		}
-	   	}
-	*/
+			if userAnswer.riddle == wordFromUser {
+				msg.Text = youWin + startingNewGame
+				userAnswer = startNewGame(userAnswer)
+			} else if len(userAnswer.answers) == 6 {
+				msg.Text = correctWordIs + userAnswer.riddle + startingNewGame
+				userAnswer = startNewGame(userAnswer)
+			} else {
+				msg.Text = numberOfTry + strconv.Itoa(6-len(userAnswer.answers))
+			}
+
+			bot.Send(msg)
+
+			users[userName] = userAnswer
+		}
+	}
+
 }

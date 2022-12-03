@@ -8,24 +8,34 @@ import (
 	"image/png"
 	"io/ioutil"
 	"log"
+	"strings"
 
 	"github.com/golang/freetype"
 	"golang.org/x/image/font"
 )
 
-/*
 var (
-	dpi      float64 = 72
-	fontfile string  = "./luxisr.ttf"
-	size     float64 = 12
+	width               int = 35
+	height              int = 35
+	marginHor           int = 5
+	marginVert          int = 5
+	yellow_correctPlace     = color.RGBA{249, 234, 0, 255}
+	white_anotherPlace      = color.RGBA{255, 255, 255, 255}
+	grey_notPresent         = color.RGBA{95, 95, 95, 255}
+	background              = color.RGBA{34, 33, 35, 255}
+	border                  = color.RGBA{103, 107, 48, 255}
+
+	hardLetter = [...]string{"ж", "җ", "м", "ш", "щ", "ы"}
 )
-*/
-var (
-	width      int = 30
-	height     int = 30
-	marginHor  int = 10
-	marginVert int = 10
-)
+
+func isHardLetter(s string) bool {
+	for i := 0; i < len(hardLetter); i++ {
+		if s == hardLetter[i] {
+			return true
+		}
+	}
+	return false
+}
 
 func definceColor(answer []rune, responce rune, i int) int {
 	if answer[i] == responce {
@@ -41,49 +51,63 @@ func definceColor(answer []rune, responce rune, i int) int {
 
 func drawRectWithLetter(myimage *image.RGBA, letter string, colorRect, x, y int) {
 	red_rect := image.Rect(x, y, x+width, y+height)
-	var myred color.RGBA
-	var fontColor *image.Uniform
+	var rectColor color.RGBA
+	fontColor := image.Black
 	switch {
 	case colorRect == 0:
-		myred = color.RGBA{128, 128, 128, 255}
+		rectColor = grey_notPresent
 		fontColor = image.White
 	case colorRect == 1:
-		myred = color.RGBA{0, 255, 255, 255}
-		fontColor = image.Black
+		rectColor = white_anotherPlace
 	case colorRect == 2:
-		myred = color.RGBA{255, 255, 0, 255}
-		fontColor = image.Black
-
+		rectColor = yellow_correctPlace
 	}
-	draw.Draw(myimage, red_rect, &image.Uniform{myred}, image.Point{}, draw.Src)
+	draw.Draw(myimage, red_rect, &image.Uniform{rectColor}, image.Point{}, draw.Src)
 
+	var fonSize float64 = 18
 	c := freetype.NewContext()
 	c.SetClip(red_rect)
-	c.SetDPI(72)
+	c.SetDPI(90)
 	c.SetDst(myimage)
-	c.SetFontSize(12)
+	c.SetFontSize(fonSize)
 	c.SetSrc(fontColor)
 	fontfile := "./Roboto-Black.ttf"
 	fontBytes, _ := ioutil.ReadFile(fontfile)
 	f, _ := freetype.ParseFont(fontBytes)
-	c.SetHinting(font.HintingNone)
+	c.SetHinting(font.HintingFull)
 	c.SetFont(f)
 
-	pt := freetype.Pt(x+width/3, y+int(c.PointToFixed(12)>>6)+height/3)
-	_, err := c.DrawString(letter, pt)
+	//	pt := freetype.Pt(x+width/3, y+int(c.PointToFixed(12)>>6)+height/3)
+	// pt - left lower point
+
+	leftEdge := x + width/3
+	if isHardLetter(letter) {
+		leftEdge = x + width/4
+	}
+
+	pt := freetype.Pt(leftEdge, y+height/2+int(c.PointToFixed(fonSize)>>6)/2)
+
+	_, err := c.DrawString(strings.ToUpper(letter), pt)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+}
 
+func drawEmptyLine(myimage *image.RGBA, x, y int) {
+	rectColor := grey_notPresent
+	for i := 0; i != 5; i++ {
+		red_rect := image.Rect(x, y, x+width, y+height)
+		draw.Draw(myimage, red_rect, &image.Uniform{rectColor}, image.Point{}, draw.Src)
+		x += marginHor + width
+	}
 }
 
 func CreateImage(answer string, words []string) []byte {
 
-	myimage := image.NewRGBA(image.Rect(0, 0, 220, len(words)*(height+marginVert)+marginVert))
-	mygreen := color.RGBA{0, 100, 0, 255} //  R, G, B, Alpha
-	// backfill entire background surface with color mygreen
-	draw.Draw(myimage, myimage.Bounds(), &image.Uniform{mygreen}, image.Point{}, draw.Src)
+	myimage := image.NewRGBA(image.Rect(0, 0, marginHor+5*(width+marginHor), marginVert+6*(height+marginVert)))
+
+	draw.Draw(myimage, myimage.Bounds(), &image.Uniform{background}, image.Point{}, draw.Src)
 
 	for line := 0; line != len(words); line++ {
 		runes := []rune(words[line])
@@ -91,6 +115,10 @@ func CreateImage(answer string, words []string) []byte {
 			colorRect := definceColor([]rune(answer), runes[i], i)
 			drawRectWithLetter(myimage, string(runes[i]), colorRect, marginHor+i*(marginHor+width), marginVert+line*(marginVert+height))
 		}
+	}
+
+	for n := len(words); n < 6; n++ {
+		drawEmptyLine(myimage, marginHor, marginVert+n*(marginVert+height))
 	}
 
 	buf := new(bytes.Buffer)
