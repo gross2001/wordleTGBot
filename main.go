@@ -6,8 +6,6 @@ import (
 	"strings"
 	imgwordle "wordle/imagewordle"
 	"wordle/vocab"
-	"net/http"
-
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -36,11 +34,9 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates := bot.GetUpdatesChan(u)
-	
-	go http.ListenAndServe("0.0.0.0:443", nil)
 
 	for update := range updates {
-		
+
 		if update.Message != nil {
 			wordFromUser := update.Message.Text
 			userName := update.Message.From.UserName
