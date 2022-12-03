@@ -31,7 +31,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	//	bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
@@ -46,7 +46,7 @@ func main() {
 
 			wordFromUser := strings.ToLower(update.Message.Text)
 			userName := update.Message.From.UserName
-			log.Printf(".Message.From.UserName[%s] Message %s", update.Message.From.UserName, update.Message.Text)
+			//	log.Printf(".Message.From.UserName[%s] Message %s", update.Message.From.UserName, update.Message.Text)
 
 			if len([]rune(wordFromUser)) != 5 {
 				msg.Text = onlyFiveLetter
@@ -90,6 +90,7 @@ func main() {
 			bot.Send(msg)
 
 			users[userName] = userAnswer
+			log.Println("Number of users", len(users))
 		}
 	}
 
