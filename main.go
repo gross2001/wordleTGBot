@@ -18,7 +18,9 @@ type usersAnswer struct {
 
 func startNewGame(userAnswer usersAnswer) usersAnswer {
 	userAnswer.riddleNumb++
-	userAnswer.riddle = answers[userAnswer.riddleNumb]
+	if userAnswer.riddleNumb < len(answers) {
+		userAnswer.riddle = answers[userAnswer.riddleNumb]
+	}
 	userAnswer.answers = make([]string, 0)
 	return userAnswer
 }
@@ -68,7 +70,7 @@ func main() {
 			}
 
 			if userAnswer.riddleNumb >= len(answers) {
-				msg.Text = wordNotExist
+				msg.Text = wordsEnded
 				bot.Send(msg)
 				continue
 			}
