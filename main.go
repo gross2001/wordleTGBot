@@ -46,7 +46,7 @@ func main() {
 
 			wordFromUser := strings.ToLower(update.Message.Text)
 			userName := update.Message.From.UserName
-			//	log.Printf(".Message.From.UserName[%s] Message %s", update.Message.From.UserName, update.Message.Text)
+			log.Printf(".Message.From.UserName[%s] Message %s", update.Message.From.UserName, update.Message.Text)
 
 			if len([]rune(wordFromUser)) != 5 {
 				msg.Text = onlyFiveLetter
@@ -67,6 +67,12 @@ func main() {
 				userAnswer.riddle = answers[0]
 			}
 
+			if userAnswer.riddleNumb >= len(answers) {
+				msg.Text = wordNotExist
+				bot.Send(msg)
+				continue
+			}
+
 			userAnswer.answers = append(userAnswer.answers, wordFromUser)
 
 			imgToSend := imgwordle.CreateImage(userAnswer.riddle, userAnswer.answers)
@@ -81,7 +87,7 @@ func main() {
 				msg.Text = youWin + startingNewGame
 				userAnswer = startNewGame(userAnswer)
 			} else if len(userAnswer.answers) == 6 {
-				msg.Text = correctWordIs + userAnswer.riddle + startingNewGame
+				msg.Text = correctWordIs + userAnswer.riddle + ".\n" + startingNewGame
 				userAnswer = startNewGame(userAnswer)
 			} else {
 				msg.Text = numberOfTry + strconv.Itoa(6-len(userAnswer.answers))

@@ -34,7 +34,7 @@ func containsNoun(s []def) bool {
 func getJSON(word string) ([]byte, error) {
 	//	url := url.QueryEscape(urlToDict + yandex + "&lang=" + lang + "&text=" + word)
 	url := urlToDict + yandex + "&lang=" + lang + "&text=" + word
-	log.Println(url)
+	//log.Println(url)
 
 	resp, err := http.Get(url)
 	if err != nil {
