@@ -99,6 +99,7 @@ func main() {
 
 			users[userName] = userAnswer
 			log.Println("Number of users", len(users))
+			log.Println(userAnswer)
 		}
 	}
 

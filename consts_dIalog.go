@@ -1,9 +1,9 @@
 package main
 
 const (
-	onlyFiveLetter  = "Сүз 5 хәрефтән торырга тиеш "
-	wordNotExist    = "Сүзлектә мондый сүз табылмады "
-	numberOfTry     = "Сиңарда калды җавап бирергә мөмкинлек: "
+	onlyFiveLetter  = "Исем 5 хәрефтән торырга тиеш "
+	wordNotExist    = "Сүзлектә мондый исем табылмады "
+	numberOfTry     = "Җавап бирү мөмкинлеге: "
 	correctWordIs   = "Дөрес сүз булды: "
 	youWin          = "Дөрес! "
 	startingNewGame = "Яңа сүз уйлап куйдым! "
