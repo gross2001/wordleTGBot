@@ -85,6 +85,8 @@ func main() {
 			}
 			bot.Send(tgbotapi.NewPhoto(int64(update.Message.Chat.ID), photoFileBytes))
 
+			log.Println(userAnswer)
+
 			if userAnswer.riddle == wordFromUser {
 				msg.Text = youWin + startingNewGame
 				userAnswer = startNewGame(userAnswer)
@@ -99,7 +101,6 @@ func main() {
 
 			users[userName] = userAnswer
 			log.Println("Number of users", len(users))
-			log.Println(userAnswer)
 		}
 	}
 
