@@ -25,7 +25,7 @@ var (
 	background              = color.RGBA{34, 33, 35, 255}
 	border                  = color.RGBA{103, 107, 48, 255}
 
-	hardLetter = [...]string{"ж", "җ", "м", "ш", "щ", "ы"}
+	hardLetter = [...]string{"ж", "җ", "м", "ш", "щ", "ы", "ю"}
 )
 
 func isHardLetter(s string) bool {
