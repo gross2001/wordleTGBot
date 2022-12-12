@@ -1,6 +1,6 @@
 package main
 
 var answers = []string{
-	"туган",
+	"билге",
 	"яңгыр",
 	"оҗмах"}
