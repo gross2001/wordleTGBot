@@ -40,8 +40,18 @@ func main() {
 	u.Timeout = 60
 	updates := bot.GetUpdatesChan(u)
 
+	endOfDay := ((timeOfStart / 86400) + 1) * 86400
+	days := 0
+	currentWord := 0
+
+	var ownerChatId int64
 	for update := range updates {
 
+		if ownerChatId == 0 {
+			if update.Message.From.UserName == botOwner {
+				ownerChatId = update.Message.Chat.ID
+			}
+		}
 		if update.Message != nil {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, " ")
 			msg.ReplyToMessageID = update.Message.MessageID
@@ -63,13 +73,23 @@ func main() {
 				continue
 			}
 
+			if update.Message.Date > endOfDay {
+				msgToOwnew := tgbotapi.NewMessage(ownerChatId, "Number of users for a last day is "+strconv.Itoa(len(users)))
+				bot.Send(msgToOwnew)
+				users = make(map[string]usersAnswer, 0)
+				endOfDay = ((update.Message.Date / 86400) + 1) * 86400
+				days = (update.Message.Date - timeOfStart) / 86400
+				currentWord = days * wordsPerDay
+				log.Println(days)
+			}
+
 			var userAnswer usersAnswer
 			var ok bool
 			if userAnswer, ok = users[userName]; !ok {
-				userAnswer.riddle = answers[0]
+				userAnswer.riddle = answers[currentWord]
 			}
 
-			if userAnswer.riddleNumb >= len(answers) {
+			if userAnswer.riddleNumb >= wordsPerDay {
 				msg.Text = wordsEnded
 				bot.Send(msg)
 				continue
