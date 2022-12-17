@@ -27,7 +27,7 @@ func startNewGame(userAnswer usersAnswer) usersAnswer {
 
 func main() {
 
-	users := make(map[string]usersAnswer, 0)
+	users := make(map[int64]usersAnswer, 0)
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
@@ -47,7 +47,7 @@ func main() {
 			msg.ReplyToMessageID = update.Message.MessageID
 
 			wordFromUser := strings.ToLower(update.Message.Text)
-			userName := update.Message.From.UserName
+			chatID := update.Message.Chat.ID
 			log.Printf(".Message.From.UserName[%s] Message %s", update.Message.From.UserName, update.Message.Text)
 
 			if len([]rune(wordFromUser)) != 5 {
@@ -65,7 +65,7 @@ func main() {
 
 			var userAnswer usersAnswer
 			var ok bool
-			if userAnswer, ok = users[userName]; !ok {
+			if userAnswer, ok = users[chatID]; !ok {
 				userAnswer.riddle = answers[0]
 			}
 
@@ -99,7 +99,7 @@ func main() {
 
 			bot.Send(msg)
 
-			users[userName] = userAnswer
+			users[chatID] = userAnswer
 			log.Println("Number of users", len(users))
 		}
 	}
