@@ -54,7 +54,7 @@ func getJSON(word string) ([]byte, error) {
 	return data, nil
 }
 
-func DoRequest(word string) string {
+func DoRequest(word string) bool {
 
 	var result myJSONstruct
 
@@ -63,10 +63,10 @@ func DoRequest(word string) string {
 	} else {
 		json.Unmarshal(jsonBytes, &result)
 		if containsNoun(result.Def) == true {
-			return word
+			return true
 		}
 	}
 
-	return ""
+	return false
 
 }

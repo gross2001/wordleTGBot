@@ -28,6 +28,11 @@ var (
 	hardLetter = [...]string{"ж", "җ", "м", "ш", "щ", "ы", "ю"}
 )
 
+const (
+	rectOnly = iota
+	withLetters
+)
+
 func isHardLetter(s string) bool {
 	for i := 0; i < len(hardLetter); i++ {
 		if s == hardLetter[i] {
@@ -37,32 +42,39 @@ func isHardLetter(s string) bool {
 	return false
 }
 
-func definceColor(answer []rune, responce rune, i int) int {
-	if answer[i] == responce {
+func definceColor(riddle []rune, responce []rune, i int) int {
+	if riddle[i] == responce[i] {
 		return 2
 	}
 	for n := 0; n != 5; n++ {
-		if answer[n] == responce {
+		if riddle[n] == responce[i] && riddle[n] != responce[n] {
 			return 1
 		}
 	}
 	return 0
 }
 
-func drawRectWithLetter(myimage *image.RGBA, letter string, colorRect, x, y int) {
+func drawRectOnly(myimage *image.RGBA, letter string, colorRect, x, y int) image.Rectangle {
 	red_rect := image.Rect(x, y, x+width, y+height)
 	var rectColor color.RGBA
-	fontColor := image.Black
 	switch {
 	case colorRect == 0:
 		rectColor = grey_notPresent
-		fontColor = image.White
 	case colorRect == 1:
 		rectColor = white_anotherPlace
 	case colorRect == 2:
 		rectColor = yellow_correctPlace
 	}
 	draw.Draw(myimage, red_rect, &image.Uniform{rectColor}, image.Point{}, draw.Src)
+	return red_rect
+}
+
+func drawRectWithLetter(myimage *image.RGBA, letter string, colorRect, x, y int) {
+	red_rect := drawRectOnly(myimage, letter, colorRect, x, y)
+	fontColor := image.Black
+	if colorRect == 0 {
+		fontColor = image.White
+	}
 
 	var fonSize float64 = 18
 	c := freetype.NewContext()
@@ -76,9 +88,6 @@ func drawRectWithLetter(myimage *image.RGBA, letter string, colorRect, x, y int)
 	f, _ := freetype.ParseFont(fontBytes)
 	c.SetHinting(font.HintingFull)
 	c.SetFont(f)
-
-	//	pt := freetype.Pt(x+width/3, y+int(c.PointToFixed(12)>>6)+height/3)
-	// pt - left lower point
 
 	leftEdge := x + width/3
 	if isHardLetter(letter) {
@@ -103,17 +112,20 @@ func drawEmptyLine(myimage *image.RGBA, x, y int) {
 	}
 }
 
-func CreateImage(answer string, words []string) []byte {
+func createImage(answer string, words []string, drawType int) []byte {
 
 	myimage := image.NewRGBA(image.Rect(0, 0, marginHor+5*(width+marginHor), marginVert+6*(height+marginVert)))
-
 	draw.Draw(myimage, myimage.Bounds(), &image.Uniform{background}, image.Point{}, draw.Src)
-
 	for line := 0; line != len(words); line++ {
-		runes := []rune(words[line])
+		responce := []rune(words[line])
 		for i := 0; i != 5; i++ {
-			colorRect := definceColor([]rune(answer), runes[i], i)
-			drawRectWithLetter(myimage, string(runes[i]), colorRect, marginHor+i*(marginHor+width), marginVert+line*(marginVert+height))
+			colorRect := definceColor([]rune(answer), responce, i)
+			if drawType == 0 {
+				drawRectOnly(myimage, string(responce[i]), colorRect, marginHor+i*(marginHor+width), marginVert+line*(marginVert+height))
+			}
+			if drawType == 1 {
+				drawRectWithLetter(myimage, string(responce[i]), colorRect, marginHor+i*(marginHor+width), marginVert+line*(marginVert+height))
+			}
 		}
 	}
 
@@ -126,4 +138,12 @@ func CreateImage(answer string, words []string) []byte {
 	send_s3 := buf.Bytes()
 
 	return send_s3
+}
+
+func RectOnly(answer string, words []string) []byte {
+	return createImage(answer, words, rectOnly)
+}
+
+func FullImage(answer string, words []string) []byte {
+	return createImage(answer, words, withLetters)
 }
