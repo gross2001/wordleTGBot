@@ -1,6 +1,7 @@
 package main
 
 var answers = []string{
+	"вакыт",
 	"хикәя",
 	"шымчы",
 	"ясмин",

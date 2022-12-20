@@ -16,9 +16,8 @@ func checkWordIsOk(word string) (bool, string) {
 }
 
 func startNewDay(currentDay *dayInfo, updateDate int) {
-	newDayNumb := updateDate / 86400
-	currentDay.currentWordNumb = newDayNumb - currentDay.dayNumb
-	currentDay.dayNumb = newDayNumb
+	currentDay.dayNumb = updateDate / 86400
+	currentDay.currentWordNumb = currentDay.dayNumb - timeOfStart/86400
 	currentDay.currentWord = answers[currentDay.currentWordNumb]
 	log.Println("New day is started")
 	log.Println("Current day is ", currentDay.dayNumb)
