@@ -41,7 +41,7 @@ func main() {
 		if update.Message != nil {
 			userWord := strings.ToLower(update.Message.Text)
 			userChatId := update.Message.Chat.ID
-			log.Printf(".Message.From.chatID[%d] Message %s", userChatId, userWord)
+			//	log.Printf(".Message.From.chatID[%d] Message %s", userChatId, userWord)
 
 			if (update.Message.Date / 86400) > currentDay.dayNumb {
 				startNewDay(&currentDay, update.Message.Date)
@@ -91,7 +91,7 @@ func main() {
 			}
 
 			users[userChatId] = userAnswer
-			log.Println("Number of users", len(users))
+			//log.Println("Number of users", len(users))
 		}
 	}
 }
