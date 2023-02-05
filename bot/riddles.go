@@ -1,6 +1,6 @@
-package main
+package bot
 
-var answers = []string{
+var riddles = []string{
 	"хикәя",
 	"шымчы",
 	"челән",

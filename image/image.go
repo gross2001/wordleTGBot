@@ -1,4 +1,4 @@
-package imgwordle
+package image
 
 import (
 	"bytes"
@@ -83,7 +83,7 @@ func drawRectWithLetter(myimage *image.RGBA, letter string, colorRect, x, y int)
 	c.SetDst(myimage)
 	c.SetFontSize(fonSize)
 	c.SetSrc(fontColor)
-	fontfile := "./Roboto-Black.ttf"
+	fontfile := "./image/Roboto-Black.ttf"
 	fontBytes, _ := ioutil.ReadFile(fontfile)
 	f, _ := freetype.ParseFont(fontBytes)
 	c.SetHinting(font.HintingFull)
