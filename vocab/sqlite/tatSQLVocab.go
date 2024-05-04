@@ -60,7 +60,13 @@ func (tatSQLVocab TatSQLVocab) chooseNewWord(day int) (string, error) {
 	q := `SELECT WORD FROM tatar_dict WHERE dayNumb IS NULL 
 	AND meaning NOT LIKE '%иск.%' 
 	AND meaning NOT LIKE '%мед.%' 
-	AND meaning NOT LIKE '%рус%' ORDER BY random() LIMIT 1;`
+	AND meaning NOT LIKE '%рус%' 
+	AND meaning NOT LIKE '%нем%' 
+	AND meaning NOT LIKE '%лат%' 
+	AND meaning NOT LIKE '%фр%' 
+	AND meaning NOT LIKE '%гр%' 
+	AND meaning NOT LIKE '%яп%' 
+	ORDER BY random() LIMIT 1;`
 	var word string
 
 	err := tatSQLVocab.db.QueryRow(q).Scan(&word)
