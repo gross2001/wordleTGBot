@@ -1,0 +1,14 @@
+[Unit]
+Description=UWordle
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/root/apps/wordle
+ExecStart=/root/apps/wordle/wordle
+Restart=always
+RestartSec=4
+StandardOutput=inherit
+
+[Install]
+WantedBy=multi-user.target
