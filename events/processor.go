@@ -2,6 +2,7 @@ package events
 
 import (
 	"log/slog"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -146,13 +147,34 @@ func (p *Processor) endGame(domain MessageInfo, userAnswers UsersAnswer) {
 		finalMessage = p.dialogs.YouWin
 	case UserLoses:
 		finalMessage = p.dialogs.CorrectWordIs + p.currentDay.CurrentWord
-	}
 
+		if p.dialogs.DictURL != "" && p.dialogs.Title == "tatar" {
+			finalMessage += p.parseTatarDictURL()
+		}
+	}
 	p.client.SendMessageToReply(domain.ChatID, domain.UserMessageID, finalMessage)
 	imgToSend := p.painter.RectOnly(p.currentDay.CurrentWord, userAnswers.Answers)
 	time.Sleep(time.Millisecond * 1000)
 	result, err := p.client.SendPhotoByChatID(domain.ChatID, imgToSend)
 	if err == nil {
 		p.client.SendMessageToReply(domain.ChatID, result.MessageID, p.dialogs.PictureToFriends)
+
 	}
+}
+
+func (p *Processor) parseTatarDictURL() string {
+	logger := slog.Default()
+
+	baseUrl, err := url.Parse(p.dialogs.DictURL)
+	if err != nil {
+		logger.Error("Can't parse a url to dict: ", err)
+		return ""
+	}
+
+	params := url.Values{}
+	params.Add("txtW", p.currentDay.CurrentWord)
+	params.Add("source[]", "9")
+	baseUrl.RawQuery = params.Encode()
+
+	return ("\n" + p.dialogs.LinkToDict + baseUrl.String())
 }
