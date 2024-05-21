@@ -64,8 +64,12 @@ func (tatSQLVocab TatSQLVocab) chooseNewWord(day int) (string, error) {
 	AND meaning NOT LIKE '%нем%' 
 	AND meaning NOT LIKE '%лат%' 
 	AND meaning NOT LIKE '%фр%' 
+	AND meaning NOT LIKE '%ингл%' 
 	AND meaning NOT LIKE '%гр%' 
+	AND meaning NOT LIKE '%гaр%' 
 	AND meaning NOT LIKE '%яп%' 
+	AND meaning NOT LIKE '%мыск%' 
+	AND meaning NOT LIKE '%диал%' 
 	ORDER BY random() LIMIT 1;`
 	var word string
 
