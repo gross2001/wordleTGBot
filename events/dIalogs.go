@@ -25,7 +25,7 @@ func NewDialogsTat() Dialogs {
 		YouWin:           "Дөрес! ",
 		StartingNewGame:  "Яңа сүз уйлап куйдым! ",
 		WordsEnded:       "Бүгенгә сүзләр бетте. Иртәгә кил! ",
-		PictureToFriends: "Дусларына җибәрер өчен сурәт. Кем сүзне тизрәк табала;)\n @TatarWordle_bot ",
+		PictureToFriends: "Дусларыңа җибәрер өчен сурәт. Кем сүзне тизрәк таба ала;)\n @TatarWordle_bot ",
 		LinksToRules:     "Кагыйдәләргә сылтама - https://telegra.ph/Rulet-of-a-wordle-12-13",
 		LinkToDict:       "Сүзне сүзлектә  карарга: ",
 		DictURL:          "https://suzlek.antat.ru/wordsTRS.php",
